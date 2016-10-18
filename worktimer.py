@@ -1,10 +1,15 @@
 from tkinter import *
 from src.timer import Timer
+from src.alarm import alarm
 import time
 
 
 class WorkTimer(Frame):
-    interval = 0
+    interval_val = -1
+    start_interval_val = 0
+    last_break_val = 0
+
+
     def __init__(self, master):
         super(WorkTimer, self).__init__(master)
         self.timer = Timer()
@@ -16,16 +21,18 @@ class WorkTimer(Frame):
         self.next_break = Label(text="",font=('times', 20, 'bold'), bg='yellow')
         self.next_break.pack(fill=BOTH)
 
-        self.update_clock()
-        # self.update_time_to_break()
         self.set_interval_lbl = Label(root, text="Set break interval in minutes:")
         self.set_interval_entry = Entry(root)
         self.start_btn = Button(root,
                                 text='Start Timer',
-                                command=lambda: self.start_timer())
+                                command=self.start_timer)
         self.quit_btn = Button(root,
                             text="Quit",
                             command=root.quit)
+        self.update_clock()
+        self.update_time_to_break()
+        self.update_last_break()
+        self.loop_interval()
         self.set_widget()
 
     def set_widget(self):
@@ -45,28 +52,40 @@ class WorkTimer(Frame):
         root.after(1000, self.update_clock)
 
     def get_interval(self):
-        self.interval = int(self.set_interval_entry.get()) * 60
-        return self.interval
+        try:
+            self.interval_val = int(self.set_interval_entry.get()) * 60
+        except ValueError:
+            return self.interval_val
+        return self.interval_val
 
+    def loop_interval(self):
+        if self.interval_val < 1:
+            self.interval_val = self.get_interval()
 
-    # def update_time_to_break(self):
-    #     break_time = self.timer.time_to_break()
-    #     self.next_break.configure(text=break_time)
-    #     root.after(1000, self.update_time_to_break)
+    def update_time_to_break(self):
+        if self.interval_val > 0:
+            print('if')
+            break_time = self.timer.time_to_break(self.interval_val)
+            self.interval_val -= 1
+            self.next_break.configure(text=break_time)
+        elif self.interval_val == 0:
+            alarm()
+            self.interval_val = self.start_interval_val
+            self.last_break_val = self.timer.timer()
+        else:
+            print('else')
+        root.after(1000, self.update_time_to_break)
+
+    def update_last_break(self):
+        last = self.last_break_val
+        if last != 0:
+            self.last_break.configure(text=last)
+        root.after(1000, self.update_last_break)
 
     def start_timer(self):
-        try:
-            self.interval = self.get_interval()
-        except ValueError as e:
-            self.interval = 0
-        print(self.interval)
-        self.next_break.configure(text=self.timer.time_to_break(self.interval))
-        root.after(1000)
+        self.interval_val = self.get_interval()
+        self.start_interval_val = self.interval_val
 
-        # for i in range(interval):
-        #     interval -= 1
-        #     print(self.timer.time_to_break(interval))
-        #     time.sleep(1)
 
 
 
