@@ -1,14 +1,13 @@
 from tkinter import *
 from src.timer import Timer
 from src.alarm import alarm
-import time
-
+from tkinter import messagebox
 
 class WorkTimer(Frame):
     interval_val = -1
     start_interval_val = 0
     last_break_val = 0
-
+    breaks = 0
 
     def __init__(self, master):
         super(WorkTimer, self).__init__(master)
@@ -20,6 +19,8 @@ class WorkTimer(Frame):
         self.last_break.pack(fill=BOTH)
         self.next_break = Label(text="",font=('times', 20, 'bold'), bg='yellow')
         self.next_break.pack(fill=BOTH)
+        self.breaks_counter = (Label(text="", font=('times', 20, 'bold'), bg='blue'))
+        self.breaks_counter.pack(fill=BOTH)
 
         self.set_interval_lbl = Label(root, text="Set break interval in minutes:")
         self.set_interval_entry = Entry(root)
@@ -32,6 +33,7 @@ class WorkTimer(Frame):
         self.update_clock()
         self.update_time_to_break()
         self.update_last_break()
+        self.update_breaks_counter()
         self.loop_interval()
         self.set_widget()
 
@@ -41,9 +43,9 @@ class WorkTimer(Frame):
         self.quit_btn.place(x=100, y=250)
         self.quit_btn.config(width=10, height=2)
 
-        self.set_interval_lbl.place(y=130, anchor=W)
+        self.set_interval_lbl.place(y=170, anchor=W)
         self.set_interval_lbl.config(width=25, height=1)
-        self.set_interval_entry.place(x=170,y=130, anchor=W)
+        self.set_interval_entry.place(x=170,y=170, anchor=W)
         self.set_interval_entry.config(width=15)
 
     def update_clock(self):
@@ -69,18 +71,27 @@ class WorkTimer(Frame):
             self.interval_val -= 1
             self.next_break.configure(text=break_time)
         elif self.interval_val == 0:
-            alarm()
+            self.time_to_coffe()
+            self.breaks += 1
+            self.update_breaks_counter()
             self.interval_val = self.start_interval_val
             self.last_break_val = self.timer.timer()
         else:
             print('else')
         root.after(1000, self.update_time_to_break)
 
+    def time_to_coffe(self):
+        # alarm()
+        messagebox.showinfo("Break time", "Move your ass!!\nLet's take break for few minutes")
+
     def update_last_break(self):
         last = self.last_break_val
         if last != 0:
             self.last_break.configure(text=last)
         root.after(1000, self.update_last_break)
+
+    def update_breaks_counter(self):
+        self.breaks_counter.configure(text=self.breaks)
 
     def start_timer(self):
         self.interval_val = self.get_interval()
