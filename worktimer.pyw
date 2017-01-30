@@ -1,7 +1,7 @@
 from tkinter import *
 from src.timer import Timer
-from src.alarm import alarm
 from tkinter import messagebox
+import winsound
 
 class WorkTimer(Frame):
     interval_val = -1
@@ -13,11 +13,11 @@ class WorkTimer(Frame):
         super(WorkTimer, self).__init__(master)
         self.timer = Timer()
 
-        self.clock_lbl = Label(text="",font=('times', 20, 'bold'), bg='green')
+        self.clock_lbl = Label(text="", font=('times', 20, 'bold'), bg='green')
         self.clock_lbl.pack(fill=BOTH)
-        self.last_break = Label(text="",font=('times', 20, 'bold'), bg='red')
+        self.last_break = Label(text="", font=('times', 20, 'bold'), bg='red')
         self.last_break.pack(fill=BOTH)
-        self.next_break = Label(text="",font=('times', 20, 'bold'), bg='yellow')
+        self.next_break = Label(text="", font=('times', 20, 'bold'), bg='yellow')
         self.next_break.pack(fill=BOTH)
         self.breaks_counter = (Label(text="", font=('times', 20, 'bold'), bg='blue'))
         self.breaks_counter.pack(fill=BOTH)
@@ -28,8 +28,8 @@ class WorkTimer(Frame):
                                 text='Start Timer',
                                 command=self.start_timer)
         self.quit_btn = Button(root,
-                            text="Quit",
-                            command=root.quit)
+                               text="Quit",
+                               command=root.quit)
         self.update_clock()
         self.update_time_to_break()
         self.update_last_break()
@@ -45,7 +45,7 @@ class WorkTimer(Frame):
 
         self.set_interval_lbl.place(y=170, anchor=W)
         self.set_interval_lbl.config(width=25, height=1)
-        self.set_interval_entry.place(x=170,y=170, anchor=W)
+        self.set_interval_entry.place(x=170, y=170, anchor=W)
         self.set_interval_entry.config(width=15)
 
     def update_clock(self):
@@ -55,7 +55,7 @@ class WorkTimer(Frame):
 
     def get_interval(self):
         try:
-            self.interval_val = int(self.set_interval_entry.get()) * 60
+            self.interval_val = int(self.set_interval_entry.get()) #* 60
         except ValueError:
             return self.interval_val
         return self.interval_val
@@ -65,8 +65,10 @@ class WorkTimer(Frame):
             self.interval_val = self.get_interval()
 
     def update_time_to_break(self):
+        if self.interval_val % 600 == 0:
+            soundfile = "c:/Windows/Media/Ring04.wav"
+            winsound.PlaySound(soundfile, winsound.SND_FILENAME | winsound.SND_ASYNC)
         if self.interval_val > 0:
-            print('if')
             break_time = self.timer.time_to_break(self.interval_val)
             self.interval_val -= 1
             self.next_break.configure(text=break_time)
@@ -76,12 +78,11 @@ class WorkTimer(Frame):
             self.update_breaks_counter()
             self.interval_val = self.start_interval_val
             self.last_break_val = self.timer.timer()
-        else:
-            print('else')
         root.after(1000, self.update_time_to_break)
 
     def time_to_coffe(self):
-        # alarm()
+        soundfile = "c:/Windows/Media/Ring07.wav"
+        winsound.PlaySound(soundfile, winsound.SND_FILENAME | winsound.SND_ASYNC)
         messagebox.showinfo("Break time", "Move your ass!!\nLet's take break for few minutes")
 
     def update_last_break(self):
@@ -96,8 +97,6 @@ class WorkTimer(Frame):
     def start_timer(self):
         self.interval_val = self.get_interval()
         self.start_interval_val = self.interval_val
-
-
 
 
 root = Tk()
